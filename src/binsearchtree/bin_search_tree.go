@@ -75,7 +75,6 @@ func (tree *BinSearchTree) Insert(value int)  {
 
 // 构造二叉搜索树
 func BuildSearchTree(arr []int) *BinSearchTree{
-	fmt.Println(arr)
 	root := new(BinSearchTree)
 	for _,v := range arr {
 		root.Insert(v)

@@ -1,4 +1,4 @@
-package main
+package binsearchtree
 
 import (
 	"math/rand"

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"go-trees/src/binsearchtree"
 	"go-trees/src/heap"
+	"go-trees/src/segment"
 )
 
 func binSearchTest()  {
@@ -40,7 +41,20 @@ func heapTest()  {
 	}
 }
 
+func segmentTest()  {
+	arr := [...]int{1,3,5,7,9,11}
+	tree := segment.BuildSegmentTree(arr[:])
+	tree.Print()
+	lb ,rb := 0, 3
+	res, err := tree.Query(lb, rb)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Printf("%d 到 %d 区间的和为 %d", lb, rb, res)
+}
+
 func main() {
 	//binSearchTest()
-	heapTest()
+	//heapTest()
+	segmentTest()
 }

@@ -6,12 +6,13 @@ import (
 	"go-trees/src/binsearchtree"
 	"go-trees/src/heap"
 	"go-trees/src/segment"
+	"go-trees/src/trie"
 )
 
 func binSearchTest()  {
-	arr := [...]int{9,2,3,5,1,55,100,20,30,910,31,90}
+	arr := []int{9,2,3,5,1,55,100,20,30,910,31,90}
 
-	tree := binsearchtree.BuildSearchTree(arr[:])
+	tree := binsearchtree.BuildSearchTree(arr)
 	tree.InOrder()
 
 	var node *binsearchtree.TreeNode
@@ -33,8 +34,8 @@ func binSearchTest()  {
 }
 
 func heapTest()  {
-	arr := [...]int{9,2,3,5,1,55,100,20,30,910,31,90}
-	heap := heap.BuildHeap(arr[:])
+	arr := []int{9,2,3,5,1,55,100,20,30,910,31,90}
+	heap := heap.BuildHeap(arr)
 	heap.Push(67)
 	heap.Push(999)
 	for ; !heap.IsEmpty();  {
@@ -43,8 +44,8 @@ func heapTest()  {
 }
 
 func segmentTest()  {
-	arr := [...]int{1,3,5,7,9,11}
-	tree := segment.BuildSegmentTree(arr[:])
+	arr := []int{1,3,5,7,9,11}
+	tree := segment.BuildSegmentTree(arr)
 	tree.Print()
 	lb ,rb := 0, 3
 	res, err := tree.Query(lb, rb)
@@ -54,15 +55,27 @@ func segmentTest()  {
 	fmt.Printf("%d 到 %d 区间的和为 %d", lb, rb, res)
 }
 
-func avlTree()  {
-	arr := [...]int{9,2,3,5,1,55,100,20,30,910,31,90}
-	tree := avl.BuildAvlTree(arr[:])
+func avlTest() {
+	arr := []int{9,2,3,5,1,55,100,20,30,910,31,90}
+	tree := avl.BuildAvlTree(arr)
 	tree.InOrder()
+}
+
+func trieTest() {
+	words := []string{"app", "apple", "ambulance", "bad", "banana"}
+	trieTree := trie.BuildTrieTree(words)
+	word := "bad"
+	if trieTree.Contains(word) {
+		fmt.Println("exist!")
+	} else {
+		fmt.Println("not exist!")
+	}
 }
 
 func main() {
 	//binSearchTest()
 	//heapTest()
 	//segmentTest()
-	avlTree()
+	//avlTest()
+	trieTest()
 }

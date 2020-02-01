@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"go-trees/src/avl"
 	"go-trees/src/binsearchtree"
 	"go-trees/src/heap"
 	"go-trees/src/segment"
@@ -53,8 +54,15 @@ func segmentTest()  {
 	fmt.Printf("%d 到 %d 区间的和为 %d", lb, rb, res)
 }
 
+func avlTree()  {
+	arr := [...]int{9,2,3,5,1,55,100,20,30,910,31,90}
+	tree := avl.BuildAvlTree(arr[:])
+	tree.InOrder()
+}
+
 func main() {
 	//binSearchTest()
 	//heapTest()
-	segmentTest()
+	//segmentTest()
+	avlTree()
 }

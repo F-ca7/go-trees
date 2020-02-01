@@ -9,7 +9,7 @@ import (
 const size int = 100000
 
 // 查找性能测试
-func BenchmarkBinSearchTree_Find(b *testing.B) {
+func BenchmarkBinSearchTree_Build(b *testing.B) {
 	rand.Seed(time.Now().Unix())
 	// 初始化测试数组
 	var arr [size]int

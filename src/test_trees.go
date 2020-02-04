@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"go-trees/src/avl"
 	"go-trees/src/binsearchtree"
+	"go-trees/src/btree"
 	"go-trees/src/heap"
 	"go-trees/src/segment"
 	"go-trees/src/trie"
@@ -72,10 +73,32 @@ func trieTest() {
 	}
 }
 
+func bTreeTest()  {
+	bTree, _ := btree.NewBTree(6)
+	_ = bTree.Insert(1, "apple")
+	bTree.Insert(2, "bad")
+	bTree.Insert(3, "cat")
+	bTree.Insert(4, "doom")
+	bTree.Insert(5, "ember")
+	bTree.Insert(6, "fiend")
+	bTree.Insert(10, "grape")
+	bTree.Insert(7, "hero")
+	bTree.Insert(8, "illegal")
+
+	data, err := bTree.Get(10)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Println(data)
+	}
+
+}
+
 func main() {
 	//binSearchTest()
 	//heapTest()
 	//segmentTest()
 	//avlTest()
-	trieTest()
+	//trieTest()
+	bTreeTest()
 }

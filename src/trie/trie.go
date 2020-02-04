@@ -17,12 +17,12 @@ func NewTreeNode() *TreeNode {
 	return node
 }
 
-func InitTrieTree() *TrieTree {
+func NewTrieTree() *TrieTree {
 	return &TrieTree{root: NewTreeNode(), Size: 0}
 }
 
 func BuildTrieTree(words []string) *TrieTree {
-	tree := InitTrieTree()
+	tree := NewTrieTree()
 	for _, word := range words {
 		tree.Add(word)
 	}

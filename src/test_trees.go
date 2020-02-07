@@ -83,8 +83,8 @@ func bTreeTest()  {
 	bTree.Insert(13, "fiend")
 	bTree.Insert(21, "grape")
 	bTree.Insert(40, "hero")
-
-	data, ok := bTree.Get(2)
+	fmt.Println("Current key num: ", bTree.Size)
+	data, ok := bTree.Get(22)
 	if !ok {
 		fmt.Println("not found")
 	} else {
@@ -94,11 +94,12 @@ func bTreeTest()  {
 
 	bTree.DeleteKey(22)
 	fmt.Println("删除22后")
+	fmt.Println("Current key num: ", bTree.Size)
 	data, ok = bTree.Get(22)
 	if !ok {
 		fmt.Println("not found")
 	} else {
-		fmt.Println(data)
+		fmt.Println("found", data)
 	}
 	bTree.Print()
 }

@@ -62,8 +62,8 @@ func NewBTree(order int) (tree *BTree, err error) {
 
 // 向B树插入数据
 func (tree *BTree) Insert(key int, data string) (err error) {
+	tree.Size++
 	tree.root = tree.insertHelper(key, data, tree.root)
-
 	return
 }
 
@@ -73,17 +73,18 @@ func (tree *BTree) insertHelper(key int, data string, node *TreeNode) *TreeNode 
 		// 分裂
 		node = tree.split(node)
 	}
-	toInsertIndex := node.binarySearchPos(key)
+	toInsertIndex, found := node.binarySearchPos(key)
 	kvPair := node.kvPairs[toInsertIndex]
 
-	if kvPair != nil && kvPair.key == key {
+	if found {
 		// 如果该 key 已存在
 		// 直接替换 value
+		tree.Size--
 		kvPair.value = data
 		return node
 	}
 
-	tree.Size++
+
 	if node.isLeaf {
 		// 如果是叶子结点
 		// 直接插入
@@ -273,7 +274,9 @@ func (tree *BTree) split(node *TreeNode) (parent *TreeNode) {
 // 通过二分查找找到
 // key 在 node 中的位置
 // 或 key 插入 node 的位置
-func (node *TreeNode) binarySearchPos(key int) int {
+// found 表示是否找到了该key
+func (node *TreeNode) binarySearchPos(key int) (pos int, found bool){
+	found = false
 	kvPairs := node.kvPairs
 	startPos, endPos := 0, node.keyNum - 1
 	mid := (startPos + endPos)/2
@@ -281,7 +284,9 @@ func (node *TreeNode) binarySearchPos(key int) int {
 	for ; startPos <= endPos;  {
 		midKey = kvPairs[mid].key
 		if key == midKey {
-			return mid
+			pos = mid
+			found = true
+			return
 		} else if key < midKey {
 			endPos = mid - 1
 		} else {
@@ -290,7 +295,8 @@ func (node *TreeNode) binarySearchPos(key int) int {
 		mid = (startPos + endPos)/2
 
 	}
-	return startPos
+	pos = startPos
+	return
 }
 
 // 删除 key
@@ -304,12 +310,12 @@ func (tree *BTree) DeleteKey(key int) bool {
 }
 
 func (tree *BTree) deleteHelper(key int, node *TreeNode) *TreeNode {
-	toDeleteIdx := node.binarySearchPos(key)
+	toDeleteIdx, found := node.binarySearchPos(key)
 
 	if node.isLeaf {
 		// 如果是叶子结点
 		// 找到则直接删除
-		if toDeleteIdx < node.keyNum && key == node.kvPairs[toDeleteIdx].key {
+		if found {
 			for i := toDeleteIdx; i < node.keyNum - 1; i++ {
 				node.kvPairs[i] = node.kvPairs[i+1]
 			}
@@ -319,48 +325,55 @@ func (tree *BTree) deleteHelper(key int, node *TreeNode) *TreeNode {
 		}
 		return node
 	}
+
+	var keyDeletedNode *TreeNode
 	// 如果不是叶子结点
-	if toDeleteIdx < node.keyNum && key == node.kvPairs[toDeleteIdx].key {
+	if found {
 		// 找到了 key
 		// 用 删除处的左链接子结点的最右键值对 来替换
 		// 即前继键值对
 		leftChildNode := node.children[toDeleteIdx]
-		predecessorKVPair := leftChildNode.kvPairs[leftChildNode.keyNum-1]
-		// 删除前继结点并记录
-		node = tree.deleteHelper(predecessorKVPair.key, node)
-
+		predecessorKVPair := leftChildNode.getMaxKVPair()
+		// 先替换
 		node.kvPairs[toDeleteIdx] = predecessorKVPair
+		// 再删除前继结点
+		keyDeletedNode = tree.deleteHelper(predecessorKVPair.key, node.children[toDeleteIdx])
+
 	} else {
 		// 递归到子结点去删除
-		keyDeletedNode := tree.deleteHelper(key, node.children[toDeleteIdx])
-		// 调整状态
-		if keyDeletedNode.keyNum < tree.minKeyNum {
-			// 发生下溢出
-			if node.childHasLeftSiblingAt(toDeleteIdx) {
-				// 优先考虑左兄弟结点
-				if node.children[toDeleteIdx-1].keyNum > tree.minKeyNum {
-					// 左兄弟的键值对足够
-					// 直接借出
-				 	_ = node.borrowFromLeft(toDeleteIdx)
-				} else {
-					// 左兄弟的键值对不够
-					// 左合并
-					_ = node.leftMerge(toDeleteIdx)
-				}
-			} else {
-				if node.children[toDeleteIdx].keyNum > tree.minKeyNum {
-					// 右兄弟的键值对足够
-					// 直接借出
-					_ = node.borrowFromRight(toDeleteIdx)
-				} else {
-					// 右兄弟的键值对不够
-					// 右合并
-					_ = node.leftMerge(toDeleteIdx + 1)
-				}
-			}
-		}
+		keyDeletedNode = tree.deleteHelper(key, node.children[toDeleteIdx])
+	}
+	// 调整状态
+	if keyDeletedNode.keyNum < tree.minKeyNum {
+		tree.adjustAfterDeletion(node, toDeleteIdx)
 	}
 	return node
+}
+
+func (tree *BTree) adjustAfterDeletion(node *TreeNode, toDeleteIdx int)  {
+	// 发生下溢出
+	if node.childHasLeftSiblingAt(toDeleteIdx) {
+		// 优先考虑左兄弟结点
+		if node.children[toDeleteIdx-1].keyNum > tree.minKeyNum {
+			// 左兄弟的键值对足够
+			// 直接借出
+			_ = node.borrowFromLeft(toDeleteIdx)
+		} else {
+			// 左兄弟的键值对不够
+			// 左合并
+			_ = node.leftMerge(toDeleteIdx)
+		}
+	} else {
+		if node.children[toDeleteIdx].keyNum > tree.minKeyNum {
+			// 右兄弟的键值对足够
+			// 直接借出
+			_ = node.borrowFromRight(toDeleteIdx)
+		} else {
+			// 右兄弟的键值对不够
+			// 右合并
+			_ = node.leftMerge(toDeleteIdx + 1)
+		}
+	}
 }
 
 // parent 的 index 处子结点
@@ -380,10 +393,11 @@ func (parent *TreeNode) childHasRightSiblingAt(index int) bool {
 func (tree *BTree) Get(key int) (value string, ok bool) {
 	current := tree.root
 	var index int
+	var found bool
 	for ; current != nil;  {
-		index = current.binarySearchPos(key)
+		index, found = current.binarySearchPos(key)
 		// 判断索引处是否匹配
-		if index < current.keyNum && key == current.kvPairs[index].key {
+		if found {
 			value = current.kvPairs[index].value
 			ok = true
 			return
@@ -396,7 +410,29 @@ func (tree *BTree) Get(key int) (value string, ok bool) {
 	return
 }
 
+// 获取结点下包括子结点的最小键值对
+func (node *TreeNode) getMinKVPair() *KVPair {
+	if node == nil {
+		 return nil
+	}
+	if node.children[0] != nil {
+		return node.children[0].getMinKVPair()
+	} else {
+		return node.kvPairs[0]
+	}
+}
 
+// 获取结点下包括子结点的最大键值对
+func (node *TreeNode) getMaxKVPair() *KVPair {
+	if node == nil {
+		return nil
+	}
+	if node.children[node.keyNum] != nil {
+		return node.children[node.keyNum].getMinKVPair()
+	} else {
+		return node.kvPairs[node.keyNum - 1]
+	}
+}
 
 // 打印B- 树
 // 调试用
@@ -425,7 +461,7 @@ func printHelper(node *TreeNode, level, pIdx, cIdx int) {
 	fmt.Println("\n-----------------")
 	if !currentNode.isLeaf {
 		for i, v := range currentNode.children {
-			printHelper(v, level+1, i, cIdx)
+			printHelper(v, level+1, cIdx, i)
 		}
 	}
 }

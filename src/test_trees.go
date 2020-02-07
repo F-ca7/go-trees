@@ -74,24 +74,33 @@ func trieTest() {
 }
 
 func bTreeTest()  {
-	bTree, _ := btree.NewBTree(6)
-	_ = bTree.Insert(1, "apple")
-	bTree.Insert(2, "bad")
-	bTree.Insert(3, "cat")
-	bTree.Insert(4, "doom")
-	bTree.Insert(5, "ember")
-	bTree.Insert(6, "fiend")
-	bTree.Insert(10, "grape")
-	bTree.Insert(7, "hero")
-	bTree.Insert(8, "illegal")
+	bTree, _ := btree.NewBTree(5)
+	_ = bTree.Insert(39, "apple")
+	bTree.Insert(22, "bad")
+	bTree.Insert(97, "cat")
+	bTree.Insert(43, "doom")
+	bTree.Insert(53, "ember")
+	bTree.Insert(13, "fiend")
+	bTree.Insert(21, "grape")
+	bTree.Insert(40, "hero")
 
-	data, err := bTree.Get(10)
-	if err != nil {
-		fmt.Println(err)
+	data, ok := bTree.Get(2)
+	if !ok {
+		fmt.Println("not found")
 	} else {
 		fmt.Println(data)
 	}
+	bTree.Print()
 
+	bTree.DeleteKey(22)
+	fmt.Println("删除22后")
+	data, ok = bTree.Get(22)
+	if !ok {
+		fmt.Println("not found")
+	} else {
+		fmt.Println(data)
+	}
+	bTree.Print()
 }
 
 func main() {
@@ -101,4 +110,5 @@ func main() {
 	//avlTest()
 	//trieTest()
 	bTreeTest()
+
 }
